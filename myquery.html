@@ -50,7 +50,6 @@ var myQuery = function( selector ){
   // e.g.: el.css(prop, val);
   this.css = function( prop, val ){
 
-
     if(this.length && this.length >0){
       for(i=0; i<this.length; i++){
         this.access(this.selection[i].style, prop, val);
@@ -65,7 +64,6 @@ var myQuery = function( selector ){
       }else{
         this.access(this.selection.style, prop, val);
       }
-
     }
 
     return this;
@@ -111,6 +109,8 @@ var myQuery = function( selector ){
 }
 
 
+/////
+
 myQuery('#container')
             .css('color','red')
             .attr('id', 'myContainer')
@@ -127,7 +127,7 @@ myQuery('#container')
 
 myQuery('.item').css('color','green');
 
-//console.log(myQuery('#container').css('color'));
+console.log(myQuery('#container').css('color'));
 </script>
 
 <style>
