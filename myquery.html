@@ -29,7 +29,7 @@ var myQuery = function( selector ){
   // Handle selections with an ID, if not
   // an ID selector, pass to qSA
   this.selection = (selector.indexOf('#')>=0)? 
-    document.getElementById(selector)[0] : 
+    document.getElementById(selector.replace('#','')) : 
     document.querySelectorAll(selector);
 
 
@@ -49,13 +49,25 @@ var myQuery = function( selector ){
   // Set CSS property values
   // e.g.: el.css(prop, val);
   this.css = function( prop, val ){
+
+
     if(this.length && this.length >0){
       for(i=0; i<this.length; i++){
         this.access(this.selection[i].style, prop, val);
       }
     }else{
-      this.access(this.selection.style, prop, val);
+
+      // If only one element is in the selection
+      // and val hasn't been passed, perform a 
+      // property lookup instead
+      if(val === undefined){
+        return this.access(this.selection.style, prop);
+      }else{
+        this.access(this.selection.style, prop, val);
+      }
+
     }
+
     return this;
   }
 
@@ -64,7 +76,7 @@ var myQuery = function( selector ){
     if(context && prop && val!==undefined){
       context[prop] = val;
     }else{
-
+      return context[prop];
     }
   }
 
@@ -114,6 +126,8 @@ myQuery('#container')
 
 
 myQuery('.item').css('color','green');
+
+//console.log(myQuery('#container').css('color'));
 </script>
 
 <style>
