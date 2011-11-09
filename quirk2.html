@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New HTML5 page</title>
+	<style type="text/css">
+	</style>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.min.js"></script>
+<script type="text/javascript">
+
+documentReady = function(callback){
+		if ( document.addEventListener ) {
+			//Supported by Opera/Webkit and some other modern browsers
+			//document.addEventListener( "DOMContentLoaded", callback, false );
+			window.addEventListener( "load", callback, false );
+
+		// If IE event model is used
+		} else if ( document.attachEvent ) {
+			// safe also for iframes
+			//document.attachEvent( "onreadystatechange", callback );
+			window.attachEvent( "onload", callback );
+		}
+}
+
+documentReady(function(){ console.log('its ready'); });
+</script>
+
+</head>
+<body>
+
+</body>
+</html>

@@ -15,6 +15,8 @@ AOL
 
 <script type="text/javascript">
 
+
+
 // Light-weight DOM library for
 // learning purposes
 // Copyright Addy Osmani, 2011.
@@ -26,6 +28,7 @@ var myQuery = function( selector ){
     return this;
   }
 
+
   // Handle selections with an ID, if not
   // an ID selector, pass to qSA
   this.selection = (selector.indexOf('#')>=0)? 
@@ -35,8 +38,23 @@ var myQuery = function( selector ){
 
   // Set the length of myQuery to the selection
   // length or 0
+//error: this cant be 0
   this.length = this.selection.length || 0;
 
+	//document ready
+	this.ready  = function(callback){
+			if ( document.addEventListener ) {
+				//Supported by Opera/Webkit and some other modern browsers
+				//document.addEventListener( "DOMContentLoaded", callback, false );
+				window.addEventListener( "load", callback, false );
+
+			// If IE event model is used
+			} else if ( document.attachEvent ) {
+				// safe also for iframes
+				//document.attachEvent( "onreadystatechange", callback );
+				window.attachEvent( "onload", callback );
+			}
+	}
 
   // Set attribute values 
   // e.g.: el.attr(prop, val);
@@ -49,8 +67,9 @@ var myQuery = function( selector ){
   // Set CSS property values
   // e.g.: el.css(prop, val);
   this.css = function( prop, val ){
-
+		
     if(this.length && this.length >0){
+	
       for(i=0; i<this.length; i++){
         this.access(this.selection[i].style, prop, val);
       }
@@ -109,8 +128,37 @@ var myQuery = function( selector ){
 }
 
 
-/////
+/////Usage///
 
+myQuery('document').ready(function(){
+	console.log('something loaded on document ready');
+	
+	myQuery('#container')
+	            .css('color','red')
+	            .attr('id', 'myContainer')
+	            .attr('title','testing')
+	            .bind('click', function(){
+	              console.log('magic');
+	            })
+	            .css('background-color','green')
+	            .bind('mouseover', function(){
+	              console.log('hover');
+	            })
+	            .css('width','400px');
+
+
+	myQuery('.item').css('color','green');
+
+
+	//this is currently broken
+	//but we need to be able to see why the getters
+	//arent working..
+	//console.log('tests');
+	//console.log(myQuery('#container').css('color'));
+	
+});
+
+/*
 myQuery('#container')
             .css('color','red')
             .attr('id', 'myContainer')
@@ -127,7 +175,13 @@ myQuery('#container')
 
 myQuery('.item').css('color','green');
 
+
+//this is currently broken
+//but we need to be able to see why the getters
+//arent working..
+console.log('tests');
 console.log(myQuery('#container').css('color'));
+*/
 </script>
 
 <style>
