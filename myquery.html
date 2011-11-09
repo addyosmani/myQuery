@@ -4,6 +4,23 @@
 </head>
 <body>
 
+<style>
+#container{
+  width:300px;
+  height:300px;
+  border:1px solid black;
+}
+
+#sidebar{
+	color:blue;
+	background:red;
+}
+
+.item{
+  color:blue;
+}
+</style>
+
 <div id="container">
 AOL
 </div>
@@ -12,10 +29,17 @@ AOL
 <div class="item">b</div>
 <div class="item">c</div>
 
+<div id="sidebar">
+Testing testing
+</div>
+
 
 <script type="text/javascript">
 
 
+/*
+Issues: we're currently overwriting styles it would seem
+*/
 
 // Light-weight DOM library for
 // learning purposes
@@ -24,25 +48,34 @@ var myQuery = function( selector ){
 
   // As per jQuery, handle myQuery('')
   // myQuery(null) or myQuery(undefined)
+  // by returning the instance if no 
+  // valid selectors are provided
   if(!selector){
     return this;
   }
 
 
-  // Handle selections with an ID, if not
-  // an ID selector, pass to qSA
-  this.selection = (selector.indexOf('#')>=0)? 
-    document.getElementById(selector.replace('#','')) : 
-    document.querySelectorAll(selector);
+  // Handle selections (ID, Class, all others)
+	if(selector.slice(0,1) === '#'){
+		//ID selector: only grab the portion after # if using getElementById (faster than qSA)
+	    this.selection = document.getElementById(selector.slice(1, selector.length))
+	}else{
+		if(selector.slice(0,1) === '.'){
+			//Class selector
+			this.selection = document.getElementsByClassName(selector.slice(1, selector.length));
+		}else{
+			//All others
+			this.selection = document.querySelectorAll(selector);
+		}
+	}
 
 
-  // Set the length of myQuery to the selection
-  // length or 0
-//error: this cant be 0
+// Set the length of myQuery to the selection length
   this.length = this.selection.length || 0;
 
 	//document ready
 	this.ready  = function(callback){
+		//this.bind('load', callback);
 			if ( document.addEventListener ) {
 				//Supported by Opera/Webkit and some other modern browsers
 				//document.addEventListener( "DOMContentLoaded", callback, false );
@@ -54,12 +87,13 @@ var myQuery = function( selector ){
 				//document.attachEvent( "onreadystatechange", callback );
 				window.attachEvent( "onload", callback );
 			}
+			
 	}
 
   // Set attribute values 
   // e.g.: el.attr(prop, val);
   this.attr = function(prop, val){
-    this.access(this.selection, prop, val);
+    this.access('attr', this.selection, prop, val);
     return this;
   }
 
@@ -68,38 +102,72 @@ var myQuery = function( selector ){
   // e.g.: el.css(prop, val);
   this.css = function( prop, val ){
 		
-    if(this.length && this.length >0){
-	
-      for(i=0; i<this.length; i++){
-        this.access(this.selection[i].style, prop, val);
-      }
-    }else{
+	//user intent: property getter
+	if(val === undefined){
+		
+		return this.access('css', this.selection, prop);
+		
+	}else{
+		//check if setter arguments valid
+		if(prop && prop!==undefined){
+			if(this.length && this.length >0){
+				
+			  //handle multiple elements
+		      for(i=0; i<this.length; i++){
+		        this.access('css',this.selection[i].style, prop, val);
+		      }				
+		
+			}else{
+				
+				//handle single elements without the need to iterate
+				this.access('css', this.selection.style, prop, val);
+				
+			}
+			return this;
+		}
+	}
 
-      // If only one element is in the selection
-      // and val hasn't been passed, perform a 
-      // property lookup instead
-      if(val === undefined){
-        return this.access(this.selection.style, prop);
-      }else{
-        this.access(this.selection.style, prop, val);
-      }
-    }
-
-    return this;
   }
 
-  // A generic property setter
-  this.access = function( context, prop, val){
-    if(context && prop && val!==undefined){
+
+
+  // A generic property setter and getter
+  this.access = function( mode, context, prop, val){
+    if(context && prop && val!==undefined && prop!==undefined){
       context[prop] = val;
     }else{
-      return context[prop];
+	//console.log('getter', context, prop, this.selection, selector);
+      //return context[prop];
+///
+	if(mode==='css'){
+		var y = "";
+		if (context.currentStyle){
+			y = context.currentStyle[prop];
+		}
+		else{
+			if (window.getComputedStyle){
+				y = document.defaultView.getComputedStyle(context,null).getPropertyValue(prop);
+			}
+		}
+		return y;
+	}else if(mode==='attr'){
+		return context[prop];
+	}
+
+
+///
     }
   }
+
+
 
   // Bind an eventType to a handler
   // el.bind(eventName, handler)
-  this.bind = function(eventName, handler) {
+  this.bind = function(eventName, handler, context) {
+	
+	//avoid duplication in .ready() by supporting document
+	//usage here.(todo)
+
     var element = this.selection;
       if (element.addEventListener) {
         element.addEventListener(eventName, handler, false);
@@ -110,6 +178,20 @@ var myQuery = function( selector ){
       else {
         element['on' + eventName] = handler;
       }
+
+
+/*
+  if (context.addEventListener) {
+    context.addEventListener(eventName, handler, false);
+  }
+  else if (context.attachEvent) {
+    context.attachEvent('on' + eventName, handler);
+  }
+  else {
+    context['on' + eventName] = handler;
+  }*/
+
+
       return this;
   };
 
@@ -128,14 +210,18 @@ var myQuery = function( selector ){
 }
 
 
+
+
 /////Usage///
 
+//works
 myQuery('document').ready(function(){
 	console.log('something loaded on document ready');
 	
+	//works
 	myQuery('#container')
 	            .css('color','red')
-	            .attr('id', 'myContainer')
+	            .attr('alt', 'myContainer')
 	            .attr('title','testing')
 	            .bind('click', function(){
 	              console.log('magic');
@@ -146,55 +232,25 @@ myQuery('document').ready(function(){
 	            })
 	            .css('width','400px');
 
-
+    //works
 	myQuery('.item').css('color','green');
+	
+	//getters currently dont work
 
 
 	//this is currently broken
 	//but we need to be able to see why the getters
 	//arent working..
 	//console.log('tests');
-	//console.log(myQuery('#container').css('color'));
+	var q = (myQuery('#sidebar').css('color'));
+	console.log('value of q:', q);
 	
 });
 
-/*
-myQuery('#container')
-            .css('color','red')
-            .attr('id', 'myContainer')
-            .attr('title','testing')
-            .bind('click', function(){
-              console.log('magic');
-            })
-            .css('background-color','green')
-            .bind('mouseover', function(){
-              console.log('hover');
-            })
-            .css('width','400px');
 
-
-myQuery('.item').css('color','green');
-
-
-//this is currently broken
-//but we need to be able to see why the getters
-//arent working..
-console.log('tests');
-console.log(myQuery('#container').css('color'));
-*/
 </script>
 
-<style>
-#container{
-  width:300px;
-  height:300px;
-  border:1px solid black;
-}
 
-.item{
-  color:blue;
-}
-</style>
 
 
 
