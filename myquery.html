@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title></title>
+  <title>myQuery experiment</title>
 </head>
 <body>
 
@@ -29,21 +29,17 @@ AOL
 <div class="item">b</div>
 <div class="item">c</div>
 
-<div id="sidebar">
+<div id="sidebar" data-role="side">
 Testing testing
 </div>
 
 
 <script type="text/javascript">
 
-
-/*
-Issues: we're currently overwriting styles it would seem
-*/
-
-// Light-weight DOM library for
-// learning purposes
+// myQuery
+// Light-weight DOM library for learning purposes
 // Copyright Addy Osmani, 2011.
+// Released under an MIT license
 var myQuery = function( selector ){
 
   // As per jQuery, handle myQuery('')
@@ -93,7 +89,17 @@ var myQuery = function( selector ){
   // Set attribute values 
   // e.g.: el.attr(prop, val);
   this.attr = function(prop, val){
-    this.access('attr', this.selection, prop, val);
+	if(prop && prop!== undefined && this.length <1){
+		if(val === undefined){
+			//attribute getter
+			return this.access('attr', this.selection, prop);
+		}else{
+			//attribute setter
+			
+			this.access('attr', this.selection, prop, val);
+		}
+	}
+    
     return this;
   }
 
@@ -102,28 +108,28 @@ var myQuery = function( selector ){
   // e.g.: el.css(prop, val);
   this.css = function( prop, val ){
 		
+	if(prop && prop!==undefined){
 	//user intent: property getter
-	if(val === undefined){
+		if(val === undefined){
+			return this.access('css', this.selection, prop);
 		
-		return this.access('css', this.selection, prop);
+		}else{
+			//check if setter arguments valid
+			//if(prop && prop!==undefined){
+				if(this.length && this.length >0){
+				
+				  //handle multiple elements
+			      for(i=0; i<this.length; i++){
+			        this.access('css',this.selection[i].style, prop, val);
+			      }				
 		
-	}else{
-		//check if setter arguments valid
-		if(prop && prop!==undefined){
-			if(this.length && this.length >0){
+				}else{
 				
-			  //handle multiple elements
-		      for(i=0; i<this.length; i++){
-		        this.access('css',this.selection[i].style, prop, val);
-		      }				
-		
-			}else{
+					//handle single elements without the need to iterate
+					this.access('css', this.selection.style, prop, val);
 				
-				//handle single elements without the need to iterate
-				this.access('css', this.selection.style, prop, val);
-				
-			}
-			return this;
+				}
+				return this;
 		}
 	}
 
@@ -214,11 +220,12 @@ var myQuery = function( selector ){
 
 /////Usage///
 
-//works
+//Ready..
 myQuery('document').ready(function(){
 	console.log('something loaded on document ready');
 	
-	//works
+	//Setter tests
+	
 	myQuery('#container')
 	            .css('color','red')
 	            .attr('alt', 'myContainer')
@@ -232,18 +239,14 @@ myQuery('document').ready(function(){
 	            })
 	            .css('width','400px');
 
-    //works
 	myQuery('.item').css('color','green');
 	
-	//getters currently dont work
 
-
-	//this is currently broken
-	//but we need to be able to see why the getters
-	//arent working..
-	//console.log('tests');
-	var q = (myQuery('#sidebar').css('color'));
-	console.log('value of q:', q);
+	//Getter tests
+	
+	var q = (myQuery('#sidebar'));
+	console.log('value of the sidebar color is:' + q.css('color'));
+	console.log('value of the sidebar id is:' + q.attr('id'));
 	
 });
 
