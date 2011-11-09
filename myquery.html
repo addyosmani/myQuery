@@ -40,6 +40,14 @@ Testing testing
 // Light-weight DOM library for learning purposes
 // Copyright Addy Osmani, 2011.
 // Released under an MIT license
+
+/*
+	Methods
+	myQuery.ready()
+	myQuery.css()
+	myQuery.attr()
+	myQuery.bind()
+*/
 var myQuery = function( selector ){
 
   // As per jQuery, handle myQuery('')
@@ -135,8 +143,6 @@ var myQuery = function( selector ){
 
   }
 
-
-
   // A generic property setter and getter
   this.access = function( mode, context, prop, val){
     if(context && prop && val!==undefined && prop!==undefined){
@@ -157,7 +163,9 @@ var myQuery = function( selector ){
 		}
 		return y;
 	}else if(mode==='attr'){
-		return context[prop];
+		//isnt playing as well with HTML5 data attributes
+		//return context[prop];
+		return context.getAttribute(prop);
 	}
 
 
@@ -247,6 +255,7 @@ myQuery('document').ready(function(){
 	var q = (myQuery('#sidebar'));
 	console.log('value of the sidebar color is:' + q.css('color'));
 	console.log('value of the sidebar id is:' + q.attr('id'));
+	console.log('value of the sidebar data-role is:' + q.attr('data-role'));
 	
 });
 
