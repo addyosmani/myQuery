@@ -64,25 +64,41 @@
 		this.init(selector);
 		
 
-		//document ready handler
-		//maybe we should generalize this to use .bind() as they'll both be
-		//relying on more/less the same 
-		this.ready  = function(callback){
-			//this.bind('load', callback);
-				if ( document.addEventListener ) {
-					//Supported by Opera/Webkit and some other modern browsers
-					//document.addEventListener( "DOMContentLoaded", callback, false );
-					window.addEventListener( "load", callback, false );
+		//Use the load-time configuration pattern
+		//to cache what events are best applicable for
+		//event handling with the current browser
+		this.addListener, this.removeListener = null;
 
-				// If IE event model is used
-				} else if ( document.attachEvent ) {
-					// safe also for iframes
-					//document.attachEvent( "onreadystatechange", callback );
-					window.attachEvent( "onload", callback );
-				}
-			
+		if (typeof window.addEventListener === 'function') {
+		    this.addListener = function (el, type, fn) {
+		        el.addEventListener(type, fn, false);
+		    };
+		    this.removeListener = function (el, type, fn) {
+		        el.removeEventListener(type, fn, false);
+		    };
+		} else if (typeof document.attachEvent === 'function') { // IE
+		    this.addListener = function (el, type, fn) {
+		        el.attachEvent('on' + type, fn);
+		    };
+		    utils.removeListener = function (el, type, fn) {
+		        el.detachEvent('on' + type, fn);
+		    };
+		} else { // older browsers
+		   	this.addListener = function (el, type, fn) {
+		        el['on' + type] = fn;
+		    };
+		    this.removeListener = function (el, type, fn) {
+		        el['on' + type] = null;
+		    };
 		}
-
+		
+		
+		//document ready handler
+		this.ready  = function(callback){
+				this.addListener(window, 'load', callback);
+		}
+		
+		
 	  // Set attribute values 
 	  // e.g.: el.attr(prop, val);
 	  //  we call .access to access properties within a specified context
@@ -159,22 +175,23 @@
 		}
 
 
-	///
 	    }
 	  }
 	
 	
-	
+	// Return an element at a particular index in a selection
 	this.eq =  function( i ) {
 		if(this.length > 1){
 			return this.selection[i];
 		}
 	};
-
+	
+	// Return the first element in a selection
 	this.first = function() {
 		return this.eq( 0 );
 	};
 
+	// Return the last element in a selection
 	this.last = function() {
 		return this.eq( this.selection.length - 1);
 	};
@@ -182,45 +199,20 @@
 
 
 
-	  // Bind an eventName to a handler
-	  // el.bind(eventName, handler)
-	  this.bind = function(eventName, handler) {
-	
-		//avoid duplication in .ready() by supporting document
-		//usage here.(todo)
-
-		 var element = this.selection;
-		      if (window.addEventListener) {
-		        element.addEventListener(eventName, handler, false);
-		      }
-		      else if (document.attachEvent) {
-		        element.attachEvent('on' + eventName, handler);
-		      }
-		      else {
-		        element['on' + eventName] = handler;
-		      }
-
-	      return this;
-	  };
+	// Bind an eventName to a handler
+	// el.bind(eventName, handler)
+	this.bind = function(eventType, handler){
+		this.addListener(this.selection, eventType, handler);
+		return this;
+	}
 
 	
 	  //Unbind an eventName 
 	  //el.unbind(eventName, handler)
-	  this.unbind = function(eventName, handler) {
-	
-	    var element = this.selection;
-	      if (window.removeEventListener) {
-	        element.removeEventListener(eventName, handler, false);
-	      }
-	      else if (document.detachEvent) {
-	        element.detachEvent('on' + eventName, handler);
-	      }
-	      else {
-	        element['on' + eventName] = null;
-	      }
-
-	      return this;
-	  };
+	this.unbind = function(eventType, handler){
+		this.removeListener(this.selection, eventType, handler);
+		return this;
+	}
 	
 
 	  this.log = function(){
