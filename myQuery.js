@@ -1,14 +1,18 @@
+/*!
+ * myQuery
+ * A lightweight DOM manipulation library for 
+ * learning purposes.
+ *
+ * Copyright 2011, Addy Osmani
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ */
 
-//last reference passed in to ensure undefined
-//is really 'undefined'. Avoid mutable issues
-//with earlier versions of ES
+
+// 'undefined' is passed in here to ensure undefined
+// is really 'undefined'. This avoids mutable issues
+// with earlier versions of ES.
 
 (function(window, undefined){
-	
-	// myQuery
-	// Lightweight DOM library for learning purposes
-	// Copyright Addy Osmani, 2011.
-	// Released under an MIT license
 
 /*
 		Methods
@@ -23,9 +27,11 @@
 		myQuery.last()
 */
 	var myQuery = function( selector ){
-		
 
+		// Initializes this instance of myQuery using
+		// a provided selector
 		this.init = function( selector ){
+			
 			// As per jQuery, handle myQuery('')
 			  // myQuery(null) or myQuery(undefined)
 			  // by returning the instance if no 
