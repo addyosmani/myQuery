@@ -22,7 +22,7 @@
 <body>
 
 <div id="container">
-AOL
+myQuery
 </div>
 
 <div class="item">a</div>
@@ -32,6 +32,8 @@ AOL
 <div id="sidebar" data-role="side">
 Testing testing
 </div>
+
+<div id="nodetest">hello!</div>
 
 <script type="text/javascript" src="myQuery.js"></script>
 <script type="text/javascript">
@@ -67,6 +69,12 @@ myQuery('document').ready(function(){
 	console.log('value of the sidebar id is:' + q.attr('id'));
 	console.log('value of the sidebar data-role is:' + q.attr('data-role'));
 	
+	var domNode = document.getElementById('nodetest');
+	myQuery(domNode).css('color','blue');	
+	
+	//
+	var s = myQuery('.item').last();//.css('color','pink');
+	console.log(s);
 });
 
 

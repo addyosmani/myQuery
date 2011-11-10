@@ -3,7 +3,7 @@
 //is really 'undefined'. Avoid mutable issues
 //with earlier versions of ES
 
-function( window, document, undefined ){
+(function(window, undefined){
 	
 	// myQuery
 	// Lightweight DOM library for learning purposes
@@ -12,43 +12,57 @@ function( window, document, undefined ){
 
 /*
 		Methods
+		myQuery(selector) > supports ID, class, qSA, dom nodes
 		myQuery.ready()
 		myQuery.css()
 		myQuery.attr()
 		myQuery.bind()
 		myQuery.unbind()
+		myQuery.eq()
+		myQuery.first()
+		myQuery.last()
 */
 	var myQuery = function( selector ){
+		
 
-	  // As per jQuery, handle myQuery('')
-	  // myQuery(null) or myQuery(undefined)
-	  // by returning the instance if no 
-	  // valid selectors are provided
-	  if(!selector){
-	    return this;
-	  }
+		this.init = function( selector ){
+			// As per jQuery, handle myQuery('')
+			  // myQuery(null) or myQuery(undefined)
+			  // by returning the instance if no 
+			  // valid selectors are provided
+			  if(!selector){
+			    return this;
+			  }
 
 
-	  // Handle selections (ID, Class, all others)
-	  // This is extremely simplified, but I want to avoid getting it too complex
-	  // It's not supposed to demonstrate Sizzle's level of interpretation by any
-	  // means. Just something understandable. Perhaps cover a few more cases?
-		if(selector.slice(0,1) === '#'){
-			//ID selector: only grab the portion after # if using getElementById (faster than qSA)
-		    this.selection = document.getElementById(selector.slice(1, selector.length))
-		}else{
-			if(selector.slice(0,1) === '.'){
-				//Class selector
-				this.selection = document.getElementsByClassName(selector.slice(1, selector.length));
-			}else{
-				//All others
-				this.selection = document.querySelectorAll(selector);
-			}
+			  // Handle selections (ID, Class, all others, DOM nodes)
+			  // This is extremely simplified, but I want to avoid getting it too complex
+			  // It's not supposed to demonstrate Sizzle's level of interpretation by any
+			  // means. Just something understandable. Perhaps cover a few more cases?
+			    //DOM nodes
+				if(selector.nodeType){
+					this.selection = selector;
+				}else{
+					//Class selector
+					if(selector.slice(0,1) === '.'){
+						this.selection = document.getElementsByClassName(selector.slice(1, selector.length));
+					}else if(selector.slice(0,1) === '#'){
+						//ID selector: only grab the portion after # if using getElementById (faster than qSA)
+					    this.selection = document.getElementById(selector.slice(1, selector.length));
+					}else{
+						//All others
+						this.selection = document.querySelectorAll(selector);
+					}
+				}
+
+
+			  // Set the local length to the selection length
+			  this.length = this.selection.length || 0;
+			
 		}
-
-
-	  // Set the local length to the selection length
-	  this.length = this.selection.length || 0;
+		
+		this.init(selector);
+		
 
 		//document ready handler
 		//maybe we should generalize this to use .bind() as they'll both be
@@ -82,7 +96,6 @@ function( window, document, undefined ){
 				return this.access('attr', this.selection, prop);
 			}else{
 				//attribute setter
-			
 				this.access('attr', this.selection, prop, val);
 			}
 		}
@@ -104,14 +117,12 @@ function( window, document, undefined ){
 				//check if setter arguments valid
 				//if(prop && prop!==undefined){
 					if(this.length && this.length >0){
-				
 					  //handle multiple elements
 				      for(i=0; i<this.length; i++){
 				        this.access('css',this.selection[i].style, prop, val);
 				      }				
 		
 					}else{
-				
 						//handle single elements without the need to iterate
 						this.access('css', this.selection.style, prop, val);
 				
@@ -151,6 +162,23 @@ function( window, document, undefined ){
 	///
 	    }
 	  }
+	
+	
+	
+	this.eq =  function( i ) {
+		if(this.length > 1){
+			return this.selection[i];
+		}
+	};
+
+	this.first = function() {
+		return this.eq( 0 );
+	};
+
+	this.last = function() {
+		return this.eq( this.selection.length - 1);
+	};
+	
 
 
 
@@ -208,5 +236,8 @@ function( window, document, undefined ){
 
 	}
 
+	// Expose myQuery to the global object
+	window.myQuery  = myQuery;
+	
 })( window );
 
