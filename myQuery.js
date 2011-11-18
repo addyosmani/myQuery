@@ -3,13 +3,13 @@
  * A lightweight DOM manipulation library for
  * learning purposes.
  *
- * Copyright 2011, Addy Osmani
+ * Copyright 2011, Addy Osmani, Andrée Hansson
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
 // 'undefined' is passed in here to ensure undefined
 // is really 'undefined'. This avoids mutable issues
 // with earlier versions of ES.
-(function(window, undefined) {
+(function(window, document, undefined) {
 
 /*
     Methods
@@ -45,9 +45,9 @@
                     this.selection = selector;
                 } else {
                     // Class selector
-                    if (selector.slice(0, 1) === '.') {
+                    if (selector[0] === '.') {
                         this.selection = document.getElementsByClassName(selector.slice(1, selector.length));
-                    } else if (selector.slice(0, 1) === '#') {
+                    } else if (selector[0] === '#') {
                         // ID selector: only grab the portion after # if using getElementById (faster than qSA)
                         this.selection = document.getElementById(selector.slice(1, selector.length));
                     } else {
@@ -68,9 +68,18 @@
             // Use the load-time configuration pattern
             // to cache what events are best applicable for
             // event handling with the current browser
-            // TODO: Move this elsewhere, these methods doesn't need to be invoked
+            // TODO: Move this elsewhere, these methods don't need to be invoked
             //       more than once, or am I misunderstanding the pattern here?
             //       Anyway -- refactor this into something less repetitive
+
+            /*
+            Todo response: So, the idea here is that we're caching
+            the addListener and removeListener events on page load
+            so that we don't need to worry about repeating this check
+            each time. In jQuery core, this (I believe) is done multiple
+            times, but the below trick could solve it. How would you
+            improve? :)
+            */
             this.addListener = this.removeListener = null;
 
             if (typeof window.addEventListener === 'function') {
@@ -130,7 +139,7 @@
             // Set CSS property values
             // E.g.: el.css(prop, val);
             this.css = function(prop, val) {
-                if (prop && prop !== undefined) {
+                if (prop) {
                     // No value means getting CSS property value
                     if (val === undefined) {
                         return this.access('css', this.selection, prop);
@@ -185,9 +194,8 @@
 
             // Return an element at a particular index in a selection
             this.eq = function(i) {
-                if (this.length > 1) {
-                    return this.selection[i];
-                }
+                var elem = this.selection[0];
+                return elem ? new myQuery(elem) : this;
             };
 
 
@@ -234,5 +242,5 @@
 
         // Expose myQuery to the global object
         window.myQuery = myQuery;
-})(window);
+})(window, document);
 
