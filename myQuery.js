@@ -228,11 +228,13 @@
 
 
             // Easy log fn
-            this.log = function() {
-                if (window.console && typeof console.log === 'function') {
+            this.log = (window.console && typeof console.log === 'function') ?
+                function() {
                     console.log(this.selection);
-                }
-            };
+                } :
+                function() {
+                    //TODO: create alternative logging
+                };
 
 
             return this instanceof myQuery ?
