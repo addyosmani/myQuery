@@ -194,7 +194,7 @@
 
             // Return an element at a particular index in a selection
             this.eq = function(i) {
-                var elem = this.selection[0];
+                var elem = this.selection[i];
                 return elem ? new myQuery(elem) : this;
             };
 
