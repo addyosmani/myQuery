@@ -45,9 +45,9 @@
                     this.selection = selector;
                 } else {
                     // Class selector
-                    if (selector[0] === '.') {
+                    if (/^\.\w+$/.test(selector)) {
                         this.selection = document.getElementsByClassName(selector.slice(1, selector.length));
-                    } else if (selector[0] === '#') {
+                    } else if (/^\#\w+$/.test(selector)) {
                         // ID selector: only grab the portion after # if using getElementById (faster than qSA)
                         this.selection = document.getElementById(selector.slice(1, selector.length));
                     } else {
