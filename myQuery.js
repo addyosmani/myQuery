@@ -11,6 +11,36 @@
 // with earlier versions of ES.
 (function(window, document, undefined) {
 
+    // cache the addListener and removeListener events on page load
+    var handleListenerAssignment = function() {
+        var events = {};
+
+        if (typeof window.addEventListener === 'function') {
+            events.addListener = function(el, type, fn) {
+                el.addEventListener(type, fn, false);
+            };
+            events.removeListener = function(el, type, fn) {
+                el.removeEventListener(type, fn, false);
+            };
+        } else if (typeof document.attachEvent === 'function') { // IE
+            events.addListener = function(el, type, fn) {
+                el.attachEvent('on' + type, fn);
+            };
+            events.removeListener = function(el, type, fn) {
+                el.detachEvent('on' + type, fn);
+            };
+        } else { // older browsers
+            events.addListener = function(el, type, fn) {
+                el['on' + type] = fn;
+            };
+            events.removeListener = function(el, type, fn) {
+                el['on' + type] = null;
+            };
+        };
+
+        return events;
+    }();
+
 /*
     Methods
     myQuery(selector) > supports ID, class, qSA, dom nodes
@@ -30,7 +60,7 @@
             this.init = function(selector) {
                 // As per jQuery, handle myQuery('')
                 // myQuery(null) or myQuery(undefined)
-                // by returning the instance if no 
+                // by returning the instance if no
                 // valid selectors are provided
                 if (!selector) {
                     return this;
@@ -68,42 +98,8 @@
             // Use the load-time configuration pattern
             // to cache what events are best applicable for
             // event handling with the current browser
-            // TODO: Move this elsewhere, these methods don't need to be invoked
-            //       more than once, or am I misunderstanding the pattern here?
-            //       Anyway -- refactor this into something less repetitive
-
-            /*
-            Todo response: So, the idea here is that we're caching
-            the addListener and removeListener events on page load
-            so that we don't need to worry about repeating this check
-            each time. In jQuery core, this (I believe) is done multiple
-            times, but the below trick could solve it. How would you
-            improve? :)
-            */
-            this.addListener = this.removeListener = null;
-
-            if (typeof window.addEventListener === 'function') {
-                this.addListener = function(el, type, fn) {
-                    el.addEventListener(type, fn, false);
-                };
-                this.removeListener = function(el, type, fn) {
-                    el.removeEventListener(type, fn, false);
-                };
-            } else if (typeof document.attachEvent === 'function') { // IE
-                this.addListener = function(el, type, fn) {
-                    el.attachEvent('on' + type, fn);
-                };
-                this.removeListener = function(el, type, fn) {
-                    el.detachEvent('on' + type, fn);
-                };
-            } else { // older browsers
-                this.addListener = function(el, type, fn) {
-                    el['on' + type] = fn;
-                };
-                this.removeListener = function(el, type, fn) {
-                    el['on' + type] = null;
-                };
-            };
+            this.addListener    = handleListenerAssignment.addListener;
+            this.removeListener = handleListenerAssignment.removeListener;
 
 
             // Document ready handler
@@ -114,7 +110,7 @@
             };
 
 
-            // Set attribute values 
+            // Set attribute values
             // E.g.: el.attr(prop, val);
             // We call .access to access properties within a specified context
             // so if I pass in `attr`, that means this is an attribute operation
@@ -219,7 +215,7 @@
             };
 
 
-            // Unbind an eventName 
+            // Unbind an eventName
             // el.unbind(eventName, handler)
             this.unbind = function(eventType, handler) {
                 this.removeListener(this.selection, eventType, handler);
